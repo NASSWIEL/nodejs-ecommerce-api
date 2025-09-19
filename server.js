@@ -5,6 +5,7 @@ const morgan = require('morgan');
 dotenv.config({ path: 'config.env' });
 
 const ApiError = require('./utils/apiError');
+const globalError = require('./middlewares/errorMiddleware');
 const dbConnection = require('./config/database');
 const categoryRoute = require('./routes/categoryRoute');
 
@@ -32,10 +33,6 @@ app.use('/api/v1/categories', categoryRoute);
 
 // Handle unmatched routes - catch all middleware using * pattern
 app.use((req, res, next) => {
-    // Create new error 
-    // const err = new Error(`Can't find this route: ${req.originalUrl}`);
-    // err.statusCode = 404;
-    // next(err);
     next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
 
@@ -44,20 +41,7 @@ app.use((req, res, next) => {
 
 
 // Global error handling middleware for unhandled errors in the app 
-app.use(
-    (err, req, res, next) => {
-        const statusCode = err.statusCode || 500;
-        err.status = err.status || 'error';
-
-        res.status(statusCode).json({
-            status: err.status,
-            error: err,
-            message: err.message,
-            stack: err.stack,
-        });
-
-
-    });
+app.use(globalError); // to faciltate reading code 
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
