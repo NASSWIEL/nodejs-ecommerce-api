@@ -4,11 +4,11 @@ const morgan = require('morgan');
 
 dotenv.config({ path: 'config.env' });
 
+const ApiError = require('./utils/apiError');
 const dbConnection = require('./config/database');
-dbConnection();
 const categoryRoute = require('./routes/categoryRoute');
 
-
+dbConnection();
 
 // express app
 const app = express();
@@ -29,6 +29,35 @@ app.get('/', (req, res) => {
 
 // Mounted routes
 app.use('/api/v1/categories', categoryRoute);
+
+// Handle unmatched routes - catch all middleware using * pattern
+app.use((req, res, next) => {
+    // Create new error 
+    // const err = new Error(`Can't find this route: ${req.originalUrl}`);
+    // err.statusCode = 404;
+    // next(err);
+    next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
+});
+
+
+
+
+
+// Global error handling middleware for unhandled errors in the app 
+app.use(
+    (err, req, res, next) => {
+        const statusCode = err.statusCode || 500;
+        err.status = err.status || 'error';
+
+        res.status(statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack,
+        });
+
+
+    });
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
