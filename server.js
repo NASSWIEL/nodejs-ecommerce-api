@@ -40,10 +40,20 @@ app.use((req, res, next) => {
 
 
 
-// Global error handling middleware for unhandled errors in the app 
+// Global error handling middleware for unhandled errors in the express
 app.use(globalError); // to faciltate reading code 
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log('Server is running on port ${PORT}');
+});
+
+
+// customise to handle unhandled promise rejections outside express like for the database
+process.on('unhandledRejection', (err) => {
+    console.log(`unhandledRejection error: ${err.name} | ${err.message}`);
+    server.close(() => { // to close server before exiting process in case there is pending requested will get fullfilled before sjutdown
+        console.error('Shutting down...');
+        process.exit(1);
+    });
 });
