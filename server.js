@@ -3,57 +3,51 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 
 dotenv.config({ path: 'config.env' });
-
 const ApiError = require('./utils/apiError');
 const globalError = require('./middlewares/errorMiddleware');
 const dbConnection = require('./config/database');
+// Routes
 const categoryRoute = require('./routes/categoryRoute');
+const subCategoryRoute = require('./routes/subCategoryRoute');
+const brandRoute = require('./routes/brandRoute');
 
+// Connect with db
 dbConnection();
 
 // express app
 const app = express();
 
-// middlewares
-app.use(express.json());  // to parse json data
+// Middlewares
+app.use(express.json());
+
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
-    console.log(`node: ${process.env.NODE_ENV}`);
+    console.log(`mode: ${process.env.NODE_ENV}`);
 }
 
-
-
-// Root route
-app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to E-commerce API', version: 'v1' });
-});
-
-// Mounted routes
+// Mount Routes
 app.use('/api/v1/categories', categoryRoute);
+app.use('/api/v1/subcategories', subCategoryRoute);
+app.use('/api/v1/brands', brandRoute);
 
-// Handle unmatched routes - catch all middleware using * pattern
+// Handle unmatched routes - catch all middleware
 app.use((req, res, next) => {
-    next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
+    next(new ApiError(`Can't find this route: ${req.originalUrl}`, 404));
 });
 
-
-
-
-
-// Global error handling middleware for unhandled errors in the express
-app.use(globalError); // to faciltate reading code 
+// Global error handling middleware for express
+app.use(globalError);
 
 const PORT = process.env.PORT || 8000;
 const server = app.listen(PORT, () => {
-    console.log('Server is running on port ${PORT}');
+    console.log(`App running running on port ${PORT}`);
 });
 
-
-// customise to handle unhandled promise rejections outside express like for the database
+// Handle rejection outside express
 process.on('unhandledRejection', (err) => {
-    console.log(`unhandledRejection error: ${err.name} | ${err.message}`);
-    server.close(() => { // to close server before exiting process in case there is pending requested will get fullfilled before sjutdown
-        console.error('Shutting down...');
+    console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+    server.close(() => {
+        console.error(`Shutting down....`);
         process.exit(1);
     });
 });
