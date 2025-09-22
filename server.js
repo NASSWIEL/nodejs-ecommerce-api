@@ -1,3 +1,5 @@
+const path = require('path');
+
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
@@ -20,6 +22,7 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'uploads'))); // to could access static files like images from uploads folder in browser for example
 
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
