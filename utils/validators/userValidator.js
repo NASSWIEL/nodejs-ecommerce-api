@@ -77,6 +77,9 @@ exports.updateUserValidator = [
         .optional()
         .isIn(['user', 'admin'])
         .withMessage('Role must be either user or admin'),
+    body('profileImage')
+        .optional(),
+
     validatorMiddleware,
 ];
 
