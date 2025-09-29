@@ -17,8 +17,7 @@ const {
     resizeImage,
 } = require('../services/categoryService');
 
-
-
+const authService = require('../services/authService');
 
 
 const subcategoriesRoute = require('./subCategoryRoute');
@@ -30,7 +29,7 @@ router.use('/:categoryId/subcategories', subcategoriesRoute);
 router
     .route('/')
     .get(getCategories)
-    .post(uploadCategoryImage, resizeImage,
+    .post(authService.protect, uploadCategoryImage, resizeImage,
         createCategoryValidator, createCategory);
 router
     .route('/:id')

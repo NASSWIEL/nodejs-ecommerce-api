@@ -69,6 +69,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: document });
 });
 
+
 exports.changeUserPassword = asyncHandler(async (req, res, next) => {
     const document = await User.findByIdAndUpdate(
         req.params.id,
@@ -86,8 +87,6 @@ exports.changeUserPassword = asyncHandler(async (req, res, next) => {
     }
     res.status(200).json({ data: document });
 });
-
-
 
 
 
