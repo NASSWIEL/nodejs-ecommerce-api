@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const ApiError = require('../utils/apiError');
 const factory = require('./handlersFactory');
@@ -61,7 +62,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     if (!token) {
         return next(
             new ApiError(
-                'You are not login, Please login to get access this route',
+                'You are not logged, Please login to get access this route',
                 401
             )
         );
@@ -100,4 +101,35 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
     req.user = currentUser;
     next();
+});
+
+// @desc   Grant access to specific roles (user premission)
+exports.allowedTo = (...roles) => asyncHandler(async (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+        return next(
+            new ApiError('You are not allowed to access this route', 403)
+        );
+    }
+    next();
+});
+
+
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+    // 1) Get user based on his email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+        return next(new ApiError(`There is no user with this email ${req.body.email}`, 404));
+    }
+    // 2) Generate random reset code and save it to database
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedResetCode = crypto.createHash('sha256').update(resetCode).digest('hex');
+
+    // save hashed password reset code to db
+    user.passwordResetCode = hashedResetCode;
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    user.passwordResetVerified = false;
+
+    user.save();
+
 });

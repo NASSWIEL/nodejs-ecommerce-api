@@ -1,8 +1,10 @@
+const multer = require('multer');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const asyncHandler = require('express-async-handler');
 const Category = require('../models/categoryModel');
 const factory = require('./handlersFactory');
+const ApiError = require('../utils/apiError');
 const { uploadSingleImage } = require('../middlewares/uploadImageMiddleware');
 
 
@@ -12,11 +14,6 @@ exports.uploadCategoryImage = uploadSingleImage('image');
 
 // image processing
 exports.resizeImage = asyncHandler(async (req, res, next) => {
-    // Check if file was uploaded
-    if (!req.file) {
-        return next(); // Skip image processing if no file uploaded
-    }
-    
     const filename = `category-${uuidv4()}-${Date.now()}.jpeg`
     await sharp(req.file.buffer).resize(600, 600) //saved in memeory storage as a buffer
         .toFormat('jpeg') // save to disk as 

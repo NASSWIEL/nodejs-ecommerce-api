@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema(
             minlength: [6, 'Too short user password'],
         },
         passwordChangedAt: Date,
+        passwordResetCode: String,
+        passwordResetExpires: Date,
+        passwordResetVerified: Boolean,
         active: {
             type: Boolean,
             default: true,
