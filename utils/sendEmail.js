@@ -1,4 +1,10 @@
-const nodemailer = require('nodemailer');
+const    const transporter = nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+}); er = require('nodemailer');
 
 // Nodemailer
 const sendEmail = async (options) => {
@@ -15,14 +21,16 @@ const sendEmail = async (options) => {
 
     // 2) Define email options (like from, to, subject, email content)
     const mailOpts = {
-        from: 'E-shop App <progahmedelsayed@gmail.com>',
+        from: `E-shop App <${process.env.EMAIL_USER}>`,
         to: options.email,
         subject: options.subject,
         text: options.message,
     };
 
     // 3) Send email
-    await transporter.sendMail(mailOpts);
+    const result = await transporter.sendMail(mailOpts);
+    console.log('Email sent successfully:', result.messageId);
+    return result;
 };
 
 module.exports = sendEmail;
