@@ -315,18 +315,3 @@ Content-Type: multipart/form-data
 
 This project is licensed under the **ISC License**.
 
-## Support
-
-For support and questions:
-- **Create an issue** in the GitHub repository
-- **Email**: your-email@domain.com
-- **Documentation**: Check the API documentation above
-
-## Related Links
-
-- [Node.js Documentation](https://nodejs.org/docs/)
-- [Express.js Guide](https://expressjs.com/)
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [JWT Documentation](https://jwt.io/)
-
----
