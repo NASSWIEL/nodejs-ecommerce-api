@@ -5,16 +5,16 @@ const {
 } = require('../utils/validators/authValidator');
 
 const {
-    signUp,
+    signup,
     login,
     forgotPassword,
 } = require('../services/authService');
 const router = express.Router();
 
 
-router.route('/signup').post(signUpValidator, signUp);
+router.route('/signup').post(signUpValidator, signup);
 router.route('/login').post(loginValidator, login);
-router.route('/forgetPassword').post(forgotPassword, login);
+router.route('/forgetPassword').post(forgotPassword);
 
 
 
