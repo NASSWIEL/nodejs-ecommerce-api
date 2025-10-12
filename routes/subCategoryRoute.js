@@ -18,7 +18,6 @@ const {
 
 const authService = require('../services/authService');
 
-
 // mergeParams: Allow us to access parameters on other routers
 // ex: We need to access categoryId from category router
 const router = express.Router({ mergeParams: true });
@@ -33,7 +32,6 @@ router
         createSubCategory
     )
     .get(createFilterObj, getSubCategories);
-
 router
     .route('/:id')
     .get(getSubCategoryValidator, getSubCategory)
@@ -45,7 +43,7 @@ router
     )
     .delete(
         authService.protect,
-        authService.allowedTo('admin', 'manager'),
+        authService.allowedTo('admin'),
         deleteSubCategoryValidator,
         deleteSubCategory
     );

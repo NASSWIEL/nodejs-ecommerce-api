@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
-const slugify = require('slugify');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: [true, 'User name is required'],
             trim: true,
+            required: [true, 'name required'],
         },
         slug: {
             type: String,
@@ -15,44 +14,59 @@ const userSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            required: [true, 'User email is required'],
+            required: [true, 'email required'],
             unique: true,
             lowercase: true,
         },
         phone: String,
-        profileImage: String,
+        profileImg: String,
+
         password: {
             type: String,
-            required: [true, 'User password is required'],
-            minlength: [6, 'Too short user password'],
+            required: [true, 'password required'],
+            minlength: [6, 'Too short password'],
         },
         passwordChangedAt: Date,
         passwordResetCode: String,
         passwordResetExpires: Date,
         passwordResetVerified: Boolean,
+        role: {
+            type: String,
+            enum: ['user', 'manager', 'admin'],
+            default: 'user',
+        },
         active: {
             type: Boolean,
             default: true,
         },
-        role: {
-            type: String,
-            enum: ['user', 'admin'],
-            default: 'user',
-        }
-        ,
+        // child reference (one to many)
+        wishlist: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: 'Product',
+            },
+        ],
+        addresses: [
+            {
+                id: { type: mongoose.Schema.Types.ObjectId },
+                alias: String,
+                details: String,
+                phone: String,
+                city: String,
+                postalCode: String,
+            },
+        ],
     },
     { timestamps: true }
 );
 
-// Mongoose middlewares 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
-    //hashing the password (encryption)
+    // Hashing user password
     this.password = await bcrypt.hash(this.password, 12);
     next();
 });
 
-
-
 const User = mongoose.model('User', userSchema);
+
 module.exports = User;

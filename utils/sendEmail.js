@@ -15,16 +15,14 @@ const sendEmail = async (options) => {
 
     // 2) Define email options (like from, to, subject, email content)
     const mailOpts = {
-        from: `E-shop App <${process.env.EMAIL_USER}>`,
+        from: 'E-shop App <progahmedelsayed@gmail.com>',
         to: options.email,
         subject: options.subject,
         text: options.message,
     };
 
     // 3) Send email
-    const result = await transporter.sendMail(mailOpts);
-    console.log('Email sent successfully:', result.messageId);
-    return result;
+    await transporter.sendMail(mailOpts);
 };
 
 module.exports = sendEmail;
