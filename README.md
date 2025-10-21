@@ -17,6 +17,7 @@ A robust RESTful API for e-commerce applications built with Node.js, Express.js,
 - **Product Search & Filtering**
 - **Product Categories & Subcategories**
 - **Brand Management**
+- **Product Reviews & Ratings**
 - **Slug Generation** for SEO-friendly URLs
 
 ### User Management
@@ -24,12 +25,31 @@ A robust RESTful API for e-commerce applications built with Node.js, Express.js,
 - **User CRUD Operations** (Admin only)
 - **Profile Image Processing**
 - **User Validation & Sanitization**
+- **User Wishlist Management**
+- **User Address Management**
+- **Self-service Profile Updates**
+- **Account Deactivation**
 
 ### Category & Brand System
 - **Hierarchical Categories** with subcategories
 - **Brand Management** with image upload
 - **Slug-based URLs** for better SEO
 - **Image Processing** for category/brand logos
+
+### Shopping Cart & Orders
+- **Shopping Cart Management**
+- **Cart Item Quantity Updates**
+- **Coupon System** with discount codes
+- **Cash on Delivery Orders**
+- **Online Payment Integration** (Stripe checkout)
+- **Order Status Management** (Paid/Delivered)
+- **Order Tracking** for users and admins
+
+### Review System
+- **Product Reviews** with ratings
+- **User-based Reviews** (one review per product per user)
+- **Review Management** (Create, Update, Delete)
+- **Nested Routes** for product-specific reviews
 
 ### Email System
 - **Automated Email Notifications**
@@ -124,9 +144,9 @@ The server will start on `http://localhost:8000`
 ```
 POST /api/v1/auth/signup          # User registration
 POST /api/v1/auth/login           # User login
-POST /api/v1/auth/forgetPassword  # Send password reset code
+POST /api/v1/auth/forgotPassword  # Send password reset code
 POST /api/v1/auth/verifyResetCode # Verify reset code
-POST /api/v1/auth/resetPassword   # Reset password
+PUT  /api/v1/auth/resetPassword   # Reset password
 ```
 
 ### Product Endpoints
@@ -167,11 +187,75 @@ DELETE /api/v1/brands/:id         # Delete brand (Admin)
 
 ### User Management Endpoints
 ```
-GET    /api/v1/users              # Get all users (Admin)
-GET    /api/v1/users/:id          # Get specific user (Admin)
-POST   /api/v1/users              # Create user (Admin)
-PUT    /api/v1/users/:id          # Update user (Admin)
-DELETE /api/v1/users/:id          # Delete user (Admin)
+# Logged User Endpoints
+GET    /api/v1/users/getMe        # Get logged user data (User)
+PUT    /api/v1/users/changeMyPassword  # Change logged user password (User)
+PUT    /api/v1/users/updateMe     # Update logged user data (User)
+DELETE /api/v1/users/deleteMe     # Deactivate logged user account (User)
+
+# Admin Endpoints
+GET    /api/v1/users              # Get all users (Admin/Manager)
+GET    /api/v1/users/:id          # Get specific user (Admin/Manager)
+POST   /api/v1/users              # Create user (Admin/Manager)
+PUT    /api/v1/users/:id          # Update user (Admin/Manager)
+PUT    /api/v1/users/changePassword/:id  # Change user password (Admin/Manager)
+DELETE /api/v1/users/:id          # Delete user (Admin/Manager)
+```
+
+### Review Endpoints
+```
+GET    /api/v1/reviews            # Get all reviews
+GET    /api/v1/reviews/:id        # Get specific review
+POST   /api/v1/reviews            # Create review (User)
+PUT    /api/v1/reviews/:id        # Update review (User - owner only)
+DELETE /api/v1/reviews/:id        # Delete review (User/Admin/Manager)
+
+# Nested route for product reviews
+GET    /api/v1/products/:productId/reviews  # Get all reviews for a product
+POST   /api/v1/products/:productId/reviews  # Create review for a product (User)
+```
+
+### Wishlist Endpoints
+```
+POST   /api/v1/wishlist           # Add product to wishlist (User)
+GET    /api/v1/wishlist           # Get logged user wishlist (User)
+DELETE /api/v1/wishlist/:productId # Remove product from wishlist (User)
+```
+
+### Address Endpoints
+```
+POST   /api/v1/addresses          # Add address to user addresses (User)
+GET    /api/v1/addresses          # Get logged user addresses (User)
+DELETE /api/v1/addresses/:addressId # Remove address from user addresses (User)
+```
+
+### Coupon Endpoints
+```
+GET    /api/v1/coupons            # Get all coupons (Admin/Manager)
+GET    /api/v1/coupons/:id        # Get specific coupon (Admin/Manager)
+POST   /api/v1/coupons            # Create coupon (Admin/Manager)
+PUT    /api/v1/coupons/:id        # Update coupon (Admin/Manager)
+DELETE /api/v1/coupons/:id        # Delete coupon (Admin/Manager)
+```
+
+### Cart Endpoints
+```
+POST   /api/v1/cart               # Add product to cart (User)
+GET    /api/v1/cart               # Get logged user cart (User)
+DELETE /api/v1/cart               # Clear cart (User)
+PUT    /api/v1/cart/applyCoupon   # Apply coupon to cart (User)
+PUT    /api/v1/cart/:itemId       # Update cart item quantity (User)
+DELETE /api/v1/cart/:itemId       # Remove specific cart item (User)
+```
+
+### Order Endpoints
+```
+POST   /api/v1/orders/:cartId     # Create cash order (User)
+GET    /api/v1/orders             # Get all orders (filtered by role)
+GET    /api/v1/orders/:id         # Get specific order
+GET    /api/v1/orders/checkout-session/:cartId  # Create checkout session (User)
+PUT    /api/v1/orders/:id/pay     # Update order to paid (Admin/Manager)
+PUT    /api/v1/orders/:id/deliver # Update order to delivered (Admin/Manager)
 ```
 
 ## Project Structure
@@ -185,40 +269,67 @@ nodejs-ecommerce-api/
 │   ├── uploadImageMiddleware.js # Image upload logic
 │   └── validatorMiddleware.js   # Validation middleware
 ├── models/
-│   ├── brandModel.js           # Brand schema
-│   ├── categoryModel.js        # Category schema
-│   ├── productModel.js         # Product schema
-│   ├── subCategoryModel.js     # Subcategory schema
-│   └── userModel.js            # User schema
+│   ├── brandModel.js            # Brand schema
+│   ├── cartModel.js             # Shopping cart schema
+│   ├── categoryModel.js         # Category schema
+│   ├── couponModel.js           # Coupon schema
+│   ├── orderModel.js            # Order schema
+│   ├── productModel.js          # Product schema
+│   ├── reviewModel.js           # Review schema
+│   ├── subCategoryModel.js      # Subcategory schema
+│   └── userModel.js             # User schema
 ├── routes/
-│   ├── authRoute.js            # Authentication routes
-│   ├── brandRoute.js           # Brand routes
-│   ├── categoryRoute.js        # Category routes
-│   ├── productRoute.js         # Product routes
-│   ├── subCategoryRoute.js     # Subcategory routes
-│   └── userRoute.js            # User routes
+│   ├── addressRoute.js          # Address routes
+│   ├── authRoute.js             # Authentication routes
+│   ├── brandRoute.js            # Brand routes
+│   ├── cartRoute.js             # Cart routes
+│   ├── categoryRoute.js         # Category routes
+│   ├── couponRoute.js           # Coupon routes
+│   ├── index.js                 # Routes mounting
+│   ├── orderRoute.js            # Order routes
+│   ├── productRoute.js          # Product routes
+│   ├── reviewRoute.js           # Review routes
+│   ├── subCategoryRoute.js      # Subcategory routes
+│   ├── userRoute.js             # User routes
+│   └── wishlistRoute.js         # Wishlist routes
 ├── services/
-│   ├── authService.js          # Authentication logic
-│   ├── brandService.js         # Brand business logic
-│   ├── categoryService.js      # Category business logic
-│   ├── handlersFactory.js      # Generic CRUD handlers
-│   ├── productService.js       # Product business logic
-│   ├── subCategoryService.js   # Subcategory business logic
-│   └── userService.js          # User business logic
+│   ├── addressService.js        # Address business logic
+│   ├── authService.js           # Authentication logic
+│   ├── brandService.js          # Brand business logic
+│   ├── cartService.js           # Cart business logic
+│   ├── categoryService.js       # Category business logic
+│   ├── couponService.js         # Coupon business logic
+│   ├── handlersFactory.js       # Generic CRUD handlers
+│   ├── orderService.js          # Order business logic
+│   ├── productService.js        # Product business logic
+│   ├── reviewService.js         # Review business logic
+│   ├── subCategoryService.js    # Subcategory business logic
+│   ├── userService.js           # User business logic
+│   └── wishlistService.js       # Wishlist business logic
 ├── utils/
-│   ├── validators/             # Input validation schemas
-│   ├── apiError.js             # Custom error class
-│   ├── apiFeatures.js          # API utilities (pagination, search, etc.)
-│   ├── createToken.js          # JWT token creation
-│   └── sendEmail.js            # Email sending utility
-├── uploads/                    # Static files (images)
+│   ├── validators/              # Input validation schemas
+│   │   ├── authValidator.js
+│   │   ├── brandValidator.js
+│   │   ├── categoryValidator.js
+│   │   ├── productValidator.js
+│   │   ├── reviewValidator.js
+│   │   ├── subCategoryValidator.js
+│   │   └── userValidator.js
+│   ├── dummyData/               # Seed data
+│   │   ├── products.json
+│   │   └── seeder.js
+│   ├── apiError.js              # Custom error class
+│   ├── apiFeatures.js           # API utilities (pagination, search, etc.)
+│   ├── createToken.js           # JWT token creation
+│   └── sendEmail.js             # Email sending utility
+├── uploads/                     # Static files (images)
 │   ├── brands/
 │   ├── categories/
 │   ├── products/
 │   └── users/
-├── config.env                  # Environment variables
-├── package.json               # Dependencies and scripts
-└── server.js                  # Application entry point
+├── config.env                   # Environment variables
+├── package.json                 # Dependencies and scripts
+└── server.js                    # Application entry point
 ```
 
 ## Configuration
